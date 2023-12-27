@@ -5,9 +5,9 @@ import { Image } from "../Image";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
 
 const Img1 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__2.jpg";
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__2.webp";
 const Img2 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__71.jpg";
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__71.webp";
 
 interface ImageGalleryProps {
   images: Image[];
