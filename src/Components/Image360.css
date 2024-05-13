@@ -9,9 +9,8 @@
 .image-gallery-360 {
   padding: 2rem;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   grid-gap: 0.5rem;
-  min-height: 120px;
   max-height: fit-content;
   margin: 0;
   overflow: auto;
@@ -21,7 +20,7 @@
   cursor: pointer;
   scale: 1;
   height: 4rem;
-  transition: all 150ms ease-in;
+  transition: all 150ms ease-in-out;
   border-radius: 0.4rem;
   text-align: center;
   margin: 0;
@@ -42,12 +41,12 @@
 .image-360 {
   max-width: 100%;
   max-height: auto;
-  opacity: 0.5;
+  filter: brightness(30%);
 }
 
 .image-container-360:hover {
-  scale: 1.005;
-  border-radius: 1rem;
+  scale: 1.015;
+  border-radius: 10rem;
 }
 
 .image-container-360:hover .text-img-name {
@@ -55,7 +54,7 @@
 }
 
 .image-container-360:hover .image-360 {
-  opacity: 1;
+  filter: brightness(100%);
 }
 
 /* ============== Med Devices(ipad) ============== */
