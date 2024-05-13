@@ -12,7 +12,6 @@ function App() {
       "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/"
     )
       .then((images) => {
-        console.log(images);
         setImages(images);
       })
       .catch((error) => {
