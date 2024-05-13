@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import "./ImageGallery.css";
 import ImageObject from "./ImageObject";
-import { Image } from "../Image";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
+import { Image } from "../Image";
+import "./ImageGallery.css";
 
 const Img1 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__2.webp";
 const Img2 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__71.webp";
 
-interface ImageGalleryProps {
+export interface ImageGalleryProps {
   images: Image[];
 }
 
@@ -36,6 +36,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
   return (
     <div>
+      <h1 className='center'>Image compare</h1>
       <div className='image-gallery '>
         {images.map((image) => (
           <ImageObject
