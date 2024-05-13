@@ -79,14 +79,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           />
         ))}
       </div>
-      <h1 className='center no-margin text-compare-number'>
-        {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
-        {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
-      </h1>
 
-      <h2 className='center no-margin text-compare-date'>
-        {imageDates.date0} - {imageDates.date1}
-      </h2>
+      <div className='current-select-footer'>
+        <h1 className='no-margin text-compare-number'>
+          {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
+          {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
+        </h1>
+
+        <h2 className='no-margin text-compare-date'>
+          {imageDates.date0} - {imageDates.date1}
+        </h2>
+      </div>
 
       <CompareZoomPanPinch
         img1={selectedImages[0]?.url || default_Img0}

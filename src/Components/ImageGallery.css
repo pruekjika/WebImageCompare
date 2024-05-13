@@ -87,6 +87,16 @@
   color: rgb(255, 255, 255);
 }
 
+.current-select-footer {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  text-align: center;
+  user-select: none;
+}
+
 .no-margin {
   margin: 0;
 }
