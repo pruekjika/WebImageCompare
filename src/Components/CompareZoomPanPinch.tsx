@@ -14,13 +14,8 @@ const CompareZoomPanPinch = (props: { img1: string; img2: string }) => {
           centerOnInit={true}
           disablePadding={true}
         >
-          {({ zoomIn, zoomOut, resetTransform }) => (
+          {() => (
             <React.Fragment>
-              <div className='tools'>
-                <button onClick={() => zoomIn()}>zoomIn +</button>
-                <button onClick={() => zoomOut()}>zoomOut -</button>
-                <button onClick={() => resetTransform()}>Reset</button>
-              </div>
               <TransformComponent>
                 {<CompareImageSlider img1={props.img1} img2={props.img2} />}
               </TransformComponent>

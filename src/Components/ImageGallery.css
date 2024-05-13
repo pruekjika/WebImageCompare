@@ -13,7 +13,7 @@
 }
 
 .image-gallery {
-  padding: 2rem;
+  padding: 0rem 2rem 0rem 2rem;
   display: grid;
   grid-template-columns: repeat(15, 1fr);
   grid-gap: 0.5rem;
@@ -78,6 +78,29 @@
   font-weight: 600;
 }
 
+.text-compare-number {
+  color: rgba(255, 255, 255, 0.808);
+  font-size: 4rem;
+}
+
+.text-compare-date {
+  color: rgb(255, 255, 255);
+}
+
+.current-select-footer {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  text-align: center;
+  user-select: none;
+}
+
+.no-margin {
+  margin: 0;
+}
+
 /* ============== Med Devices(ipad) ============== */
 @media screen and (max-width: 1124px) {
   .image-gallery {
@@ -99,6 +122,16 @@
   .full-container {
     padding: 1rem;
   }
+
+  .current-select-footer {
+    position: static;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
+  }
 }
 
 /* ============== Small Devices(phone) ============== */
@@ -119,6 +152,16 @@
     max-height: fit-content;
   }
 
+  .current-select-footer {
+    position: static;
+    bottom: 0rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
+  }
+
   .full-container {
     padding: 1rem;
   }
@@ -131,6 +174,16 @@
     grid-gap: 0.8rem;
     min-height: 1100px;
     max-height: fit-content;
+  }
+
+  .current-select-footer {
+    position: static;
+    bottom: 0rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
   }
 
   .full-container {
