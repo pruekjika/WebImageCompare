@@ -4,10 +4,10 @@ import CompareZoomPanPinch from "./CompareZoomPanPinch";
 import { Image } from "../Image";
 import "./ImageGallery.css";
 
-const Img1 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/__2.webp";
-const Img2 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/__71.webp";
+const default_Img1 =
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
+const default_Img2 =
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/71.webp";
 
 export interface ImageGalleryProps {
   images: Image[];
@@ -49,9 +49,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         ))}
       </div>
 
+      <h2 className='center'>
+        {selectedImages[0]?.name} vs {selectedImages[1]?.name}
+      </h2>
+
       <CompareZoomPanPinch
-        img1={selectedImages[0]?.url || Img1}
-        img2={selectedImages[1]?.url || Img2}
+        img1={selectedImages[0]?.url || default_Img1}
+        img2={selectedImages[1]?.url || default_Img2}
       />
     </div>
   );
