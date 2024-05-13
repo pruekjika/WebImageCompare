@@ -26,7 +26,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     const [datePart, timePart] = dateTimeString.split(" ");
     const [year, month, day] = datePart.split(":");
     const date = new Date(`${month}/${day}/${year} ${timePart}`);
-    const options = { year: "numeric", month: "short", day: "numeric" };
+    const options = { day: "2-digit", month: "short", year: "numeric" };
     return date.toLocaleDateString("en-US", options);
   };
 
