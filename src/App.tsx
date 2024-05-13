@@ -4,7 +4,6 @@ import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
 import { fetchImagesFromRepo } from "./api";
 import { Image } from "./Image";
-import ImageWhat from "./Components/what";
 
 function App() {
   const [images, setImages] = useState<Image[]>([]);
@@ -36,7 +35,6 @@ function App() {
   return (
     <>
       {/* image gallery if final call because it easier to send image button data to compare */}
-      <ImageWhat />
       <Image360View images={images360} />
       <ImageGallery images={images} />
     </>

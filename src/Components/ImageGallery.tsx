@@ -25,9 +25,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const formatDateTime = (dateTimeString: string): string => {
     const [datePart, timePart] = dateTimeString.split(" ");
     const [year, month, day] = datePart.split(":");
-    const date = new Date(`${month}/${day}/${year} ${timePart}`);
+    const date = new Date(`${year}-${month}-${day}T${timePart}`);
     const options = { day: "2-digit", month: "short", year: "numeric" };
-    return date.toLocaleDateString("en-US", options);
+    const formattedDate = date.toLocaleDateString("en-US", options);
+    const [formattedDay, formattedMonth, formattedYear] =
+      formattedDate.split(" ");
+    return `${formattedDay} ${formattedMonth} ${formattedYear}`;
   };
 
   useEffect(() => {
@@ -75,14 +78,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           />
         ))}
       </div>
-      <h2 className='center'>
-        {selectedImages[0]?.name.replace(".webp", "") ?? ""} -{" "}
-        {selectedImages[1]?.name.replace(".webp", "") ?? ""}
-      </h2>
+      <h1 className='center'>
+        {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
+        {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
+      </h1>
 
-      <h2 className='center'>
+      <h3 className='center'>
         {imageDates.date0} - {imageDates.date1}
-      </h2>
+      </h3>
 
       <CompareZoomPanPinch
         img1={selectedImages[0]?.url || default_Img1}
