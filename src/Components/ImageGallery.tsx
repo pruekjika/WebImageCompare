@@ -26,7 +26,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     const [datePart, timePart] = dateTimeString.split(" ");
     const [year, month, day] = datePart.split(":");
     const date = new Date(`${month}/${day}/${year} ${timePart}`);
-    const options = { day: "2-digit", month: "short", year: "numeric" };
+    const options = { year: "numeric", month: "short", day: "numeric" };
     return date.toLocaleDateString("en-US", options);
   };
 
@@ -79,14 +79,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           />
         ))}
       </div>
-      <h1 className='center no-margin'>
+      <h1 className='center no-margin text-compare-number'>
         {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
         {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
       </h1>
 
-      <h3 className='center no-margin'>
+      <h2 className='center no-margin text-compare-date'>
         {imageDates.date0} - {imageDates.date1}
-      </h3>
+      </h2>
 
       <CompareZoomPanPinch
         img1={selectedImages[0]?.url || default_Img0}
