@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import EXIF from "exif-js";
 
 const What = async () => {
   // "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
