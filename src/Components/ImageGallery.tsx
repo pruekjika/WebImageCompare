@@ -50,7 +50,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
       </div>
 
       <h2 className='center'>
-        {selectedImages[0]?.name} vs {selectedImages[1]?.name}
+        {selectedImages[0]?.name.replace(".webp", "")} vs{" "}
+        {selectedImages[1]?.name.replace(".webp", "")}
       </h2>
 
       <CompareZoomPanPinch

@@ -2,6 +2,7 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
+import ImageWhat from "./Components/what";
 import { fetchImagesFromRepo } from "./api";
 import { Image } from "./Image";
 
@@ -35,6 +36,7 @@ function App() {
   return (
     <>
       {/* image gallery if final call because it easier to send image button data to compare */}
+      <ImageWhat />
       <Image360View images={images360} />
       <ImageGallery images={images} />
     </>

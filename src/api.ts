@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// `https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/Fixed/`
+// `https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/`
 import { Image } from "./Image";
 
 const accessToken = import.meta.env.VITE_GITHUB_ACCESS_TOKEN;
