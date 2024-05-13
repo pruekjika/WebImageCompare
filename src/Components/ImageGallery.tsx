@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageObject from "./ImageObject";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
 import { Image } from "../Image";
 import "./ImageGallery.css";
+import ExifReader from "exifreader";
 
 const default_Img1 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
@@ -15,6 +16,26 @@ export interface ImageGalleryProps {
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const [selectedImages, setSelectedImages] = useState<Image[]>([]);
+
+  const [image0date, setImage0Date] = useState("");
+  useEffect(() => {
+    const fetchData = async () => {
+      const tags = await ExifReader.load(selectedImages[0].url);
+      const date = tags["DateTimeOriginal"].description;
+      setImage0Date(date);
+    };
+    fetchData();
+  }, [selectedImages]);
+
+  const [image1date, setImage1Date] = useState("");
+  useEffect(() => {
+    const fetchData = async () => {
+      const tags = await ExifReader.load(selectedImages[1].url);
+      const date = tags["DateTimeOriginal"].description;
+      setImage1Date(date);
+    };
+    fetchData();
+  }, [selectedImages]);
 
   const handleImageClick = (image: Image) => {
     if (selectedImages.length < 2) {
@@ -48,10 +69,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           />
         ))}
       </div>
+      <h2 className='center'>
+        {selectedImages[0]?.name.replace(".webp", "")} -{" "}
+        {selectedImages[1]?.name.replace(".webp", "")}
+      </h2>
 
       <h2 className='center'>
-        {selectedImages[0]?.name.replace(".webp", "")} vs{" "}
-        {selectedImages[1]?.name.replace(".webp", "")}
+        {image0date} - {image1date}
       </h2>
 
       <CompareZoomPanPinch

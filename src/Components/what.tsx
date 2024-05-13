@@ -1,19 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ExifReader from "exifreader";
 
-const What = async () => {
-  // "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
-  // "https://raw.githubusercontent.com/pruekjika/GardenImg360/main/low-2.jpg";
+const What = () => {
+  const [imageDate, setImageDate] = useState("");
 
-  const tags = await ExifReader.load(
-    "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp"
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      const tags = await ExifReader.load(
+        "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp"
+      );
+      const date = tags["DateTimeOriginal"].description;
+      setImageDate(date);
+    };
 
-  const imageDate = tags["DateTimeOriginal"].description;
-  // const unprocessedTagValue = tags["DateTimeOriginal"].value;
-  console.log(imageDate);
+    fetchData();
+  }, []);
 
-  return <div>what</div>;
+  return <div>{imageDate}</div>;
 };
 
 export default What;

@@ -2,9 +2,9 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
-import ImageWhat from "./Components/what";
 import { fetchImagesFromRepo } from "./api";
 import { Image } from "./Image";
+import ImageWhat from "./Components/what";
 
 function App() {
   const [images, setImages] = useState<Image[]>([]);
