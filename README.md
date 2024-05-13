@@ -32,9 +32,12 @@ const response = await fetch(
 
 ### problem that face after revisit
 
-1. forget how to do git secret env
-2. token = the token in `setting > developer setting > personal access token > Token (classic) > The value of garden — repo` is the value that need to write in `.env` file
-3. example in `.env` file have this value `VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+forget how to do git secret env
+
+### fix by
+
+1. get new token from `setting > developer setting > personal access token > Token (classic) > The value of garden — repo` is the value that need to write in `.env` file
+2. add `.env` file that have this one line `VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
 
 ### thing that needed
 
