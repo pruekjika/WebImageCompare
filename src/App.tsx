@@ -9,7 +9,7 @@ function App() {
   const [images, setImages] = useState<Image[]>([]);
   useEffect(() => {
     fetchImagesFromRepo(
-      "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/Fixed/"
+      "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/"
     )
       .then((images) => {
         console.log(images);
