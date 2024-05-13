@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Image } from "../Image";
-import ImageObject from "./ImageObject";
-import "./ImageGallery.css";
+import "./Image360.css";
+import ImageObject360 from "./ImageObject360";
 
 export interface ImageGalleryProps {
   images: Image[];
@@ -9,7 +9,14 @@ export interface ImageGalleryProps {
 
 const Image360View: React.FC<ImageGalleryProps> = ({ images }) => {
   const handleImageClick = (image: Image) => {
-    window.open(image.url);
+    window.open(
+      `https://renderstuff.com/tools/360-panorama-web-viewer-sharing/?image=${image.url}`
+    );
+    // url link is
+    // https://raw.githubusercontent.com/pruekjika/GardenImg360/main/low-2.jpg
+
+    // real link is
+    // https://renderstuff.com/tools/360-panorama-web-viewer-sharing/?image=https://raw.githubusercontent.com/meangpu/GardenImageTest/main/newHomeLocation.JPG&title=newHomeLocation
   };
 
   return (
@@ -17,12 +24,11 @@ const Image360View: React.FC<ImageGalleryProps> = ({ images }) => {
       <h1 className='center'>360 Image view</h1>
       <div className='image-gallery-360'>
         {images.map((image) => (
-          <ImageObject
+          <ImageObject360
             key={image.name}
             imgUrl={image.url}
             imgName={image.name}
             onClick={() => handleImageClick(image)}
-            style={"is-not-selected"}
           />
         ))}
       </div>
