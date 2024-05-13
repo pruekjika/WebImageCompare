@@ -24,7 +24,7 @@ function App() {
   return (
     <>
       {/* image gallery if final call because it easier to send image button data to compare */}
-      <h1>Image compare</h1>
+      <h1 className='center'>Image compare</h1>
       <ImageGallery images={images} />
     </>
   );

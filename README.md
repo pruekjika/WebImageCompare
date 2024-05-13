@@ -8,7 +8,7 @@ need to do authenticated to make it more stable by
 1.  create `.env` file and add line below to pc
 
 ```
-VITE_GITHUB_ACCESS_TOKEN={{token}}
+VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 2. and add github secret in github
@@ -29,3 +29,7 @@ const response = await fetch(
 4. ให้ทำการ build vite ผ่าน github action โดย ทำตามนี้
 
    [Deploying a Vite app on GitHub Pages using GitHub Actions with GitHub Secrets - DEV Community](https://dev.to/dwtoledo/deploying-a-vite-app-on-github-pages-using-github-actions-with-github-secrets-1hn0)
+
+### problem that face after revisit
+
+1. forget how to do git secret env

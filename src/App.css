@@ -6,3 +6,7 @@
   height: 100dvh;
   width: 100dvw;
 }
+
+.center {
+  text-align: center;
+}
