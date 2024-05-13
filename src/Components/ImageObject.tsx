@@ -10,10 +10,9 @@ const ImageObject = (props: {
     <div className={`image-container ${props.style}`} onClick={props.onClick}>
       <div className='center-text'>
         <p className='text-img-name'>{`${props.imgName
-          .replace("__", "")
           .replace(".webp", "")
           .replace(".jpg", "")}`}</p>
-        <p className='text-img-date'>{`${props.imgName}`}</p>
+        {/* <p className='text-img-date'>{`${props.imgName}`}</p> */}
       </div>
     </div>
   );
