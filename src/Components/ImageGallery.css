@@ -79,7 +79,7 @@
 }
 
 .text-compare-number {
-  color: rgba(255, 255, 255, 0.466);
+  color: rgba(255, 255, 255, 0.808);
   font-size: 4rem;
 }
 
@@ -122,6 +122,16 @@
   .full-container {
     padding: 1rem;
   }
+
+  .current-select-footer {
+    position: static;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
+  }
 }
 
 /* ============== Small Devices(phone) ============== */
@@ -142,6 +152,16 @@
     max-height: fit-content;
   }
 
+  .current-select-footer {
+    position: static;
+    bottom: 0rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
+  }
+
   .full-container {
     padding: 1rem;
   }
@@ -154,6 +174,16 @@
     grid-gap: 0.8rem;
     min-height: 1100px;
     max-height: fit-content;
+  }
+
+  .current-select-footer {
+    position: static;
+    bottom: 0rem;
+    left: 50%;
+    transform: translateX(-0%);
+    z-index: 9999;
+    text-align: center;
+    user-select: none;
   }
 
   .full-container {

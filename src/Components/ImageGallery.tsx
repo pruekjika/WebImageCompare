@@ -86,9 +86,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
         </h1>
 
-        <h2 className='no-margin text-compare-date'>
+        <h3 className='no-margin text-compare-date'>
           {imageDates.date0} - {imageDates.date1}
-        </h2>
+        </h3>
       </div>
 
       <CompareZoomPanPinch
