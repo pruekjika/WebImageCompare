@@ -5,9 +5,9 @@ import { Image } from "../Image";
 import "./ImageGallery.css";
 import ExifReader from "exifreader";
 
-const default_Img1 =
+const default_Img0 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
-const default_Img2 =
+const default_Img1 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/71.webp";
 
 export interface ImageGalleryProps {
@@ -25,22 +25,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const formatDateTime = (dateTimeString: string): string => {
     const [datePart, timePart] = dateTimeString.split(" ");
     const [year, month, day] = datePart.split(":");
-    const date = new Date(`${year}-${month}-${day}T${timePart}`);
+    const date = new Date(`${month}/${day}/${year} ${timePart}`);
     const options = { day: "2-digit", month: "short", year: "numeric" };
-    const formattedDate = date.toLocaleDateString("en-US", options);
-    const [formattedDay, formattedMonth, formattedYear] =
-      formattedDate.split(" ");
-    return `${formattedDay} ${formattedMonth} ${formattedYear}`;
+    return date.toLocaleDateString("en-US", options);
   };
 
   useEffect(() => {
     const fetchData = async () => {
       const [tags0, tags1] = await Promise.all([
-        ExifReader.load(selectedImages[0]?.url || default_Img1),
-        ExifReader.load(selectedImages[1]?.url || default_Img2),
+        ExifReader.load(selectedImages[0]?.url || default_Img0),
+        ExifReader.load(selectedImages[1]?.url || default_Img1),
       ]);
-      const date0 = formatDateTime(tags0["DateTimeOriginal"].description);
-      const date1 = formatDateTime(tags1["DateTimeOriginal"].description);
+      const date0 = formatDateTime(
+        tags0?.["DateTimeOriginal"]?.description || ""
+      );
+      const date1 = formatDateTime(
+        tags1?.["DateTimeOriginal"]?.description || ""
+      );
       setImageDates({ date0, date1 });
     };
     fetchData();
@@ -78,18 +79,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
           />
         ))}
       </div>
-      <h1 className='center'>
+      <h1 className='center no-margin'>
         {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
         {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
       </h1>
 
-      <h3 className='center'>
+      <h3 className='center no-margin'>
         {imageDates.date0} - {imageDates.date1}
       </h3>
 
       <CompareZoomPanPinch
-        img1={selectedImages[0]?.url || default_Img1}
-        img2={selectedImages[1]?.url || default_Img2}
+        img1={selectedImages[0]?.url || default_Img0}
+        img2={selectedImages[1]?.url || default_Img1}
       />
     </div>
   );

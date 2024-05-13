@@ -78,6 +78,10 @@
   font-weight: 600;
 }
 
+.no-margin {
+  margin: 0;
+}
+
 /* ============== Med Devices(ipad) ============== */
 @media screen and (max-width: 1124px) {
   .image-gallery {
