@@ -5,9 +5,9 @@ import { Image } from "../Image";
 import "./ImageGallery.css";
 
 const Img1 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__2.webp";
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/__2.webp";
 const Img2 =
-  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/Fixed/__71.webp";
+  "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/__71.webp";
 
 export interface ImageGalleryProps {
   images: Image[];
