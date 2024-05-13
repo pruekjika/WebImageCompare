@@ -1,21 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import EXIF from "exif-js";
 
-const what = () => {
-  const imageTarget = new Image();
-  imageTarget.src =
-    "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
+const What = async () => {
+  // "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
+  // "https://raw.githubusercontent.com/pruekjika/GardenImg360/main/low-2.jpg";
 
-  EXIF.getData(imageTarget, function () {
-    const make = EXIF.getTag(this, "Make");
-    const model = EXIF.getTag(this, "Model");
-    const date = EXIF.getTag(this, "DateTimeOriginal");
+  const blob = await fetch(
+    "https://raw.githubusercontent.com/pruekjika/GardenImg360/main/low-2.jpg"
+  ).then((r) => r.blob()); //creating blob object
 
-    console.log("Make:", make);
-    console.log("Model:", model);
-    console.log("Date:", date);
+  const file = new File([blob], "cover.jpg", {
+    type: "image/jpg",
   });
+
+  console.log(file);
   return <div>what</div>;
 };
 
-export default what;
+export default What;
