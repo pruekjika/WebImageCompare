@@ -8,19 +8,13 @@ if (!accessToken) {
   throw new Error("GitHub access token not found");
 }
 
-export async function fetchImagesFromRepo(
-  owner: string,
-  repo: string
-): Promise<Image[]> {
+export async function fetchImagesFromRepo(path: string): Promise<Image[]> {
   try {
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/ImageDB/Fixed/`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await fetch(`${path}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch repository contents");
     }

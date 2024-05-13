@@ -88,6 +88,14 @@
     max-height: fit-content;
   }
 
+  .image-gallery-360 {
+    padding: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 0.5rem;
+    min-height: 120px;
+    max-height: fit-content;
+  }
+
   .full-container {
     padding: 1rem;
   }
@@ -100,6 +108,14 @@
     grid-template-columns: repeat(6, 1fr);
     grid-gap: 0.8rem;
     min-height: 1000px;
+    max-height: fit-content;
+  }
+
+  .image-gallery-360 {
+    padding: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0.5rem;
+    min-height: 120px;
     max-height: fit-content;
   }
 

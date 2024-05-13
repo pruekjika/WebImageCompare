@@ -1,0 +1,90 @@
+.center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 0;
+}
+
+.image-gallery-360 {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-gap: 0.5rem;
+  max-height: fit-content;
+  margin: 0;
+  overflow: auto;
+}
+
+.image-container-360 {
+  cursor: pointer;
+  scale: 1;
+  height: 4rem;
+  transition: all 150ms ease-in-out;
+  border-radius: 0.4rem;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.text-img-name {
+  font-weight: bolder;
+  font-size: large;
+  color: rgb(255, 255, 255);
+}
+
+.image-360 {
+  max-width: 100%;
+  max-height: auto;
+  filter: brightness(30%);
+}
+
+.image-container-360:hover {
+  scale: 1.015;
+  border-radius: 10rem;
+}
+
+.image-container-360:hover .text-img-name {
+  color: rgba(255, 255, 255, 0);
+}
+
+.image-container-360:hover .image-360 {
+  filter: brightness(100%);
+}
+
+/* ============== Med Devices(ipad) ============== */
+@media screen and (max-width: 1124px) {
+  .image-gallery-360 {
+    padding: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 0.5rem;
+    min-height: 120px;
+    max-height: fit-content;
+  }
+}
+
+/* ============== Small Devices(phone) ============== */
+@media screen and (max-width: 664px) {
+  .image-gallery-360 {
+    padding: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0.5rem;
+    min-height: 120px;
+    max-height: fit-content;
+  }
+}
+
+@media screen and (max-width: 300px) {
+  .image-gallery-360 {
+    padding: 1rem;
+    grid-template-columns: repeat(1, 1fr);
+    grid-gap: 0.5rem;
+    min-height: 120px;
+    max-height: fit-content;
+  }
+}

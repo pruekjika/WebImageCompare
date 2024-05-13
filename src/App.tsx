@@ -1,17 +1,16 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
+import Image360View from "./Components/Image360View";
 import { fetchImagesFromRepo } from "./api";
 import { Image } from "./Image";
 
-const owner = "pruekjika";
-const repo = "GardenImgDB";
-
 function App() {
   const [images, setImages] = useState<Image[]>([]);
-
   useEffect(() => {
-    fetchImagesFromRepo(owner, repo)
+    fetchImagesFromRepo(
+      "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/Fixed/"
+    )
       .then((images) => {
         console.log(images);
         setImages(images);
@@ -21,10 +20,23 @@ function App() {
       });
   }, []);
 
+  const [images360, setImages360] = useState<Image[]>([]);
+  useEffect(() => {
+    fetchImagesFromRepo(
+      "https://api.github.com/repos/pruekjika/GardenImg360/contents/"
+    )
+      .then((images) => {
+        setImages360(images);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }, []);
+
   return (
     <>
       {/* image gallery if final call because it easier to send image button data to compare */}
-      <h1 className='center'>Image compare</h1>
+      <Image360View images={images360} />
       <ImageGallery images={images} />
     </>
   );
