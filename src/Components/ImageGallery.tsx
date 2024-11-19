@@ -94,6 +94,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         </h3>
       </div>
 
+      <br></br>
+
       <CompareZoomPanPinch
         img1={selectedImages[0]?.url || default_Img0}
         img2={selectedImages[1]?.url || default_Img1}

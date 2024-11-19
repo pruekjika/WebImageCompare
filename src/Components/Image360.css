@@ -9,7 +9,7 @@
 .image-gallery-360 {
   padding: 0rem 2rem 0rem 2rem;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   grid-gap: 0.5rem;
   max-height: fit-content;
   margin: 0;
@@ -20,16 +20,16 @@
   cursor: pointer;
   scale: 1;
   height: 4rem;
-  transition: all 150ms ease-in-out;
   border-radius: 0.4rem;
   text-align: center;
   margin: 0;
   padding: 0;
-
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+
+  transition: all 150ms ease-in-out;
 }
 
 .text-img-name {
@@ -45,8 +45,8 @@
 }
 
 .image-container-360:hover {
-  scale: 1.015;
-  border-radius: 10rem;
+  scale: 1.01;
+  border-radius: 1rem;
 }
 
 .image-container-360:hover .text-img-name {

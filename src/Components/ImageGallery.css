@@ -20,7 +20,7 @@
   min-height: 400px;
   max-height: fit-content;
   margin: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .image-container {
@@ -31,8 +31,9 @@
   transition: all 100ms ease-in-out;
   border-radius: 0.4rem;
   text-align: center;
-  background-color: black;
+  background-color: rgb(32, 32, 32);
   margin: 0;
+  border-radius: 1rem;
 }
 
 .is-selected {
@@ -45,8 +46,7 @@
 
 .image-container:hover {
   filter: grayscale(0%);
-  scale: 1.1;
-  border-radius: 1rem;
+  scale: 1.02;
 }
 
 .center-text {
