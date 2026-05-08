@@ -22,12 +22,12 @@
 
 .image-gallery {
   padding: 0rem 2rem 0rem 2rem;
-  display: grid;
-  grid-template-columns: repeat(15, 1fr);
-  grid-gap: 0.5rem;
-  min-height: 400px;
+  --cols: 30;
+  --gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
   max-height: fit-content;
-  margin: 0;
   overflow: hidden;
 }
 
@@ -75,6 +75,8 @@
   cursor: pointer;
   scale: 1;
   height: 2.5rem;
+  position: relative;
+  flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
   user-select: none;
   transition: all 100ms ease-in-out;
   border-radius: 0.4rem;
@@ -151,8 +153,8 @@
 @media screen and (max-width: 1124px) {
   .image-gallery {
     padding: 1rem;
-    grid-template-columns: repeat(8, 1fr);
-    grid-gap: 0.5rem;
+    --cols: 8;
+    --gap: 0.5rem;
     min-height: 800px;
     max-height: fit-content;
   }
@@ -190,8 +192,8 @@
 @media screen and (max-width: 664px) {
   .image-gallery {
     padding: 1rem;
-    grid-template-columns: repeat(6, 1fr);
-    grid-gap: 0.8rem;
+    --cols: 6;
+    --gap: 0.8rem;
     min-height: 1000px;
     max-height: fit-content;
   }
@@ -236,8 +238,8 @@
 @media screen and (max-width: 300px) {
   .image-gallery {
     padding: 0.4rem;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 0.8rem;
+    --cols: 4;
+    --gap: 0.8rem;
     min-height: 1100px;
     max-height: fit-content;
   }
