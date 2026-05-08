@@ -3,6 +3,7 @@ import "./ImageGallery.css";
 const ImageObject = (props: {
   imgUrl: string;
   imgName: string;
+  imgDate?: string;
   style: string;
   onClick: () => void;
 }) => {
@@ -12,7 +13,7 @@ const ImageObject = (props: {
         <p className='text-img-name'>{`${props.imgName
           .replace(".webp", "")
           .replace(".jpg", "")}`}</p>
-        {/* <p className='text-img-date'>{`${props.imgName}`}</p> */}
+        {props.imgDate ? <p className='text-img-date'>{props.imgDate}</p> : null}
       </div>
     </div>
   );

@@ -5,6 +5,24 @@ import { Image } from "../Image";
 import "./ImageGallery.css";
 import ExifReader from "exifreader";
 
+const formatExifDateTime = (dateTimeString: string): string => {
+  const [datePart, timePart] = dateTimeString.split(" ");
+  const [year, month, day] = datePart.split(":");
+  const date = new Date(`${month}/${day}/${year} ${timePart}`);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const readExifDate = async (url: string): Promise<string> => {
+  const tags = await ExifReader.load(url);
+  const raw = tags?.["DateTimeOriginal"]?.description || "";
+  if (!raw) return "";
+  return formatExifDateTime(raw);
+};
+
 const default_Img0 =
   "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/2.webp";
 const default_Img1 =
@@ -18,39 +36,88 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const [selectedImages, setSelectedImages] = useState<Image[]>([]);
   const compareStageRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [imageDateByUrl, setImageDateByUrl] = useState<Record<string, string>>(
+    {},
+  );
 
   const [imageDates, setImageDates] = useState<{
     date0: string;
     date1: string;
   }>({ date0: "", date1: "" });
 
-  const formatDateTime = (dateTimeString: string): string => {
-    const [datePart, timePart] = dateTimeString.split(" ");
-    const [year, month, day] = datePart.split(":");
-    const date = new Date(`${month}/${day}/${year} ${timePart}`);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      const CONCURRENCY = 4;
+      const queue = images
+        .map((img) => img.url)
+        .filter((url) => url && !imageDateByUrl[url]);
+      if (queue.length === 0) return;
+
+      let idx = 0;
+      const workers = Array.from({ length: CONCURRENCY }, async () => {
+        while (idx < queue.length && !cancelled) {
+          const url = queue[idx++];
+          try {
+            const date = await readExifDate(url);
+            if (cancelled) return;
+            if (!date) continue;
+            setImageDateByUrl((prev) =>
+              prev[url] ? prev : { ...prev, [url]: date },
+            );
+          } catch {
+            // ignore images without EXIF / network failures
+          }
+        }
+      });
+
+      await Promise.all(workers);
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally do not depend on imageDateByUrl to avoid re-creating the job repeatedly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [tags0, tags1] = await Promise.all([
-        ExifReader.load(selectedImages[0]?.url || default_Img0),
-        ExifReader.load(selectedImages[1]?.url || default_Img1),
+      const url0 = selectedImages[0]?.url || default_Img0;
+      const url1 = selectedImages[1]?.url || default_Img1;
+
+      const [date0Cached, date1Cached] = [
+        imageDateByUrl[url0],
+        imageDateByUrl[url1],
+      ];
+
+      const [date0Loaded, date1Loaded] = await Promise.all([
+        date0Cached ? Promise.resolve(date0Cached) : readExifDate(url0),
+        date1Cached ? Promise.resolve(date1Cached) : readExifDate(url1),
       ]);
-      const date0 = formatDateTime(
-        tags0?.["DateTimeOriginal"]?.description || "",
-      );
-      const date1 = formatDateTime(
-        tags1?.["DateTimeOriginal"]?.description || "",
-      );
+
+      if (date0Loaded) {
+        setImageDateByUrl((prev) =>
+          prev[url0] ? prev : { ...prev, [url0]: date0Loaded },
+        );
+      }
+      if (date1Loaded) {
+        setImageDateByUrl((prev) =>
+          prev[url1] ? prev : { ...prev, [url1]: date1Loaded },
+        );
+      }
+
+      const date0 = date0Loaded || "";
+      const date1 = date1Loaded || "";
       setImageDates({ date0, date1 });
     };
     fetchData();
-  }, [selectedImages]);
+  }, [selectedImages, imageDateByUrl]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -101,6 +168,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             key={image.name}
             imgUrl={image.url}
             imgName={image.name}
+            imgDate={imageDateByUrl[image.url]}
             onClick={() => handleImageClick(image)}
             style={isSelected(image) ? "is-selected" : "is-not-selected"}
           />
