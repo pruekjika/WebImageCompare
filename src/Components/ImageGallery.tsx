@@ -186,16 +186,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         ))}
       </div>
 
-      <div className='current-select-footer'>
-        <h1 className='no-margin text-compare-number'>
-          {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
-          {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
-        </h1>
+      {!isFullscreen && (
+        <div className='current-select-footer'>
+          <h1 className='no-margin text-compare-number'>
+            {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
+            {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
+          </h1>
 
-        <h3 className='no-margin text-compare-date'>
-          {imageDates.date0} - {imageDates.date1}
-        </h3>
-      </div>
+          <h3 className='no-margin text-compare-date'>
+            {imageDates.date0} - {imageDates.date1}
+          </h3>
+        </div>
+      )}
 
       <div className='compare-toolbar'>
         <button
@@ -209,6 +211,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
       </div>
 
       <div ref={compareStageRef} className='compare-stage'>
+        {isFullscreen && (
+          <div className='current-select-footer current-select-footer--overlay'>
+            <h1 className='no-margin text-compare-number'>
+              {selectedImages[0]?.name.replace(".webp", "") ?? "2"} -{" "}
+              {selectedImages[1]?.name.replace(".webp", "") ?? "71"}
+            </h1>
+
+            <h3 className='no-margin text-compare-date'>
+              {imageDates.date0} - {imageDates.date1}
+            </h3>
+          </div>
+        )}
         <CompareZoomPanPinch
           img1={selectedImages[0]?.url || default_Img0}
           img2={selectedImages[1]?.url || default_Img1}

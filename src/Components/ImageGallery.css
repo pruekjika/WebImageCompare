@@ -54,6 +54,7 @@
 
 .compare-stage {
   width: 100%;
+  position: relative;
 }
 
 .compare-stage:fullscreen {
@@ -142,6 +143,15 @@
   text-align: center;
   user-select: none;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.compare-stage:fullscreen .current-select-footer--overlay {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none;
 }
 
 .no-margin {
