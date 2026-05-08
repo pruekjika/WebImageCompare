@@ -8,7 +8,6 @@ const ImageObject360 = (props: {
   return (
     <div className={`image-container-360`} onClick={props.onClick}>
       <img src={props.imgUrl} alt={props.imgName} className='image-360' />
-
       <div className='center-text'>
         <p className='text-img-name'>{`${props.imgName
           .replace("__", "")

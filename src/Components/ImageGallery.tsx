@@ -16,11 +16,22 @@ const formatExifDateTime = (dateTimeString: string): string => {
   });
 };
 
+const formatExifDateTimeYYMMDD = (dateTimeString: string): string => {
+  const [datePart] = dateTimeString.split(" ");
+  const [year, month, day] = datePart.split(":");
+  const yy = year.slice(-2);
+  const mm = month.padStart(2, "0");
+  const dd = day.padStart(2, "0");
+  return `${yy}.${mm}.${dd}`;
+};
+
 const readExifDate = async (url: string): Promise<string> => {
   const tags = await ExifReader.load(url);
   const raw = tags?.["DateTimeOriginal"]?.description || "";
   if (!raw) return "";
-  return formatExifDateTime(raw);
+  // Precompute alternate format (yy.mm.dd) for easy future switching.
+  formatExifDateTime(raw); // format 12 may 2026 ถ้าอยากเปลี่ยนใช้ก็เอาอันนี้แทนด้านล่าง
+  return formatExifDateTimeYYMMDD(raw);
 };
 
 const default_Img0 =
