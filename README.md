@@ -1,3 +1,20 @@
+### ถ้าไม่ได้ทำนานๆจะลืมเรื่องนี้
+
+forget how to do git secret env
+
+### แก้โดย
+
+1. get new token from `setting > developer setting > personal access token > Token (classic) > The value of garden — repo` is the value that need to write in `.env` file
+2. add `.env` file that have this one line `VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+### thing that needed
+
+1. Environment secrets
+2. token
+
+---
+
+The Repository secrets is `not` needed
 this is my first time pull image from github folder
 it have limit to Rate-limits (up to `60 per-hour` for anonymous, up to 5,000 per-hour for authenticated)
 
@@ -22,7 +39,7 @@ const response = await fetch(
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-  }
+  },
 );
 ```
 
@@ -30,22 +47,8 @@ const response = await fetch(
 
    [Deploying a Vite app on GitHub Pages using GitHub Actions with GitHub Secrets - DEV Community](https://dev.to/dwtoledo/deploying-a-vite-app-on-github-pages-using-github-actions-with-github-secrets-1hn0)
 
-### problem that face after revisit
-
-forget how to do git secret env
-
-### fix by
-
-1. get new token from `setting > developer setting > personal access token > Token (classic) > The value of garden — repo` is the value that need to write in `.env` file
-2. add `.env` file that have this one line `VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-### thing that needed
-
-1. Environment secrets
-2. token
-
-The Repository secrets is `not` needed
-
 ### to do
 
 - [ ] [ My Favorite UI Library Keeps Getting Better - YouTube](https://youtu.be/zlX0lrX2oLA?si=DDhNYU6L81hFCC9d&t=136) at time stamp change choose image to use button drawer for better ux design
+
+- [ ] fullscreen still not work on iphone mobile
