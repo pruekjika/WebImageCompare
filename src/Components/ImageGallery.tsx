@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ImageObject from "./ImageObject";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
 import { Image } from "../Image";
@@ -16,6 +16,8 @@ export interface ImageGalleryProps {
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const [selectedImages, setSelectedImages] = useState<Image[]>([]);
+  const compareStageRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [imageDates, setImageDates] = useState<{
     date0: string;
@@ -40,15 +42,37 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         ExifReader.load(selectedImages[1]?.url || default_Img1),
       ]);
       const date0 = formatDateTime(
-        tags0?.["DateTimeOriginal"]?.description || ""
+        tags0?.["DateTimeOriginal"]?.description || "",
       );
       const date1 = formatDateTime(
-        tags1?.["DateTimeOriginal"]?.description || ""
+        tags1?.["DateTimeOriginal"]?.description || "",
       );
       setImageDates({ date0, date1 });
     };
     fetchData();
   }, [selectedImages]);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        return;
+      }
+      await compareStageRef.current?.requestFullscreen();
+    } catch {
+      // Best-effort: fullscreen can fail due to browser/user settings.
+    }
+  };
 
   const handleImageClick = (image: Image) => {
     if (selectedImages.length < 2) {
@@ -69,9 +93,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   };
 
   return (
-    <div>
-      <h1 className='center'>Image compare</h1>
-      <div className='image-gallery '>
+    <div className='image-gallery-page'>
+      <h1 className='center image-gallery-title'>Image compare</h1>
+      <div className='image-gallery'>
         {images.map((image) => (
           <ImageObject
             key={image.name}
@@ -94,12 +118,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         </h3>
       </div>
 
-      <br></br>
+      <div className='compare-toolbar'>
+        <button
+          type='button'
+          className='fullscreen-btn'
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        </button>
+      </div>
 
-      <CompareZoomPanPinch
-        img1={selectedImages[0]?.url || default_Img0}
-        img2={selectedImages[1]?.url || default_Img1}
-      />
+      <div ref={compareStageRef} className='compare-stage'>
+        <CompareZoomPanPinch
+          img1={selectedImages[0]?.url || default_Img0}
+          img2={selectedImages[1]?.url || default_Img1}
+        />
+      </div>
     </div>
   );
 };
