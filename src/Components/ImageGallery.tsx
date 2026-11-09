@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ImageObject from "./ImageObject";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
 import { Image } from "../Image";
 import "./ImageGallery.css";
-import ExifReader from "exifreader";
 
 const formatExifDateTime = (dateTimeString: string): string => {
   const [datePart, timePart] = dateTimeString.split(" ");
@@ -25,7 +24,10 @@ const formatExifDateTimeYYMMDD = (dateTimeString: string): string => {
   return `${yy}.${mm}.${dd}`;
 };
 
+// Only for images whose date isn't in index.json: ExifReader downloads the whole
+// image, so it is loaded on demand and skipped entirely when the index has dates.
 const readExifDate = async (url: string): Promise<string> => {
+  const { default: ExifReader } = await import("exifreader");
   const tags = await ExifReader.load(url);
   const raw = tags?.["DateTimeOriginal"]?.description || "";
   if (!raw) return "";
@@ -56,6 +58,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     date1: string;
   }>({ date0: "", date1: "" });
 
+  const indexDateByUrl = useMemo(() => {
+    const dates: Record<string, string> = {};
+    for (const img of images) {
+      if (img.date) dates[img.url] = formatExifDateTimeYYMMDD(img.date);
+    }
+    return dates;
+  }, [images]);
+
+  const dateOf = (url: string): string | undefined =>
+    indexDateByUrl[url] ?? imageDateByUrl[url];
+
   useEffect(() => {
     if (images.length === 0) return;
 
@@ -64,6 +77,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     const run = async () => {
       const CONCURRENCY = 4;
       const queue = images
+        .filter((img) => !img.date)
         .map((img) => img.url)
         .filter((url) => url && !imageDateByUrl[url]);
       if (queue.length === 0) return;
@@ -98,14 +112,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   }, [images]);
 
   useEffect(() => {
+    // Wait for the image list, so dates already in index.json aren't re-read from EXIF.
+    if (images.length === 0) return;
+
     const fetchData = async () => {
       const url0 = selectedImages[0]?.url || default_Img0;
       const url1 = selectedImages[1]?.url || default_Img1;
 
-      const [date0Cached, date1Cached] = [
-        imageDateByUrl[url0],
-        imageDateByUrl[url1],
-      ];
+      const [date0Cached, date1Cached] = [dateOf(url0), dateOf(url1)];
 
       const [date0Loaded, date1Loaded] = await Promise.all([
         date0Cached ? Promise.resolve(date0Cached) : readExifDate(url0),
@@ -128,7 +142,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
       setImageDates({ date0, date1 });
     };
     fetchData();
-  }, [selectedImages, imageDateByUrl]);
+    // dateOf only reads indexDateByUrl and imageDateByUrl, which are listed here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images, selectedImages, indexDateByUrl, imageDateByUrl]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -179,7 +195,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             key={image.name}
             imgUrl={image.url}
             imgName={image.name}
-            imgDate={imageDateByUrl[image.url]}
+            imgDate={dateOf(image.url)}
             onClick={() => handleImageClick(image)}
             style={isSelected(image) ? "is-selected" : "is-not-selected"}
           />

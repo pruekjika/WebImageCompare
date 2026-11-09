@@ -20,10 +20,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
-#Allow repo secrets
-env:
-  VITE_GITHUB_ACCESS_TOKEN: ${{ secrets.VITE_GITHUB_ACCESS_TOKEN }}
-
 jobs:
   # Single deploy job since we're just deploying
   deploy:

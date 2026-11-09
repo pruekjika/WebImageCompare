@@ -2,13 +2,14 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
-import { fetchImagesFromRepo } from "./api";
+import { fetchImageIndex, fetchImagesFromRepo } from "./api";
 import { Image } from "./Image";
 
 function App() {
   const [images, setImages] = useState<Image[]>([]);
   useEffect(() => {
-    fetchImagesFromRepo(
+    fetchImageIndex(
+      "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/index.json",
       "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/"
     )
       .then((images) => {

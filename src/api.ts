@@ -1,42 +1,71 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-// `https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/`
 import { Image } from "./Image";
 
-const accessToken = import.meta.env.VITE_GITHUB_ACCESS_TOKEN;
-if (!accessToken) {
-  throw new Error("GitHub access token not found");
+// No access token: everything here is public and read without credentials.
+
+const IMAGE_FILE = /\.(jpeg|jpg|png|gif|webp)$/i;
+
+const byNumberInName = (a: Image, b: Image) =>
+  Number(a.name.match(/\d+/)?.[0]) - Number(b.name.match(/\d+/)?.[0]);
+
+interface IndexEntry {
+  name: string;
+  url?: string;
+  date?: string | null;
 }
 
-export async function fetchImagesFromRepo(path: string): Promise<Image[]> {
+interface ContentsEntry {
+  type: string;
+  name: string;
+  path: string;
+  download_url: string;
+}
+
+/**
+ * Read a gallery's index.json (an array of { name, url?, date? }).
+ * `url` defaults to `name` and is resolved against the index's own URL;
+ * `date` is the EXIF DateTimeOriginal string ("YYYY:MM:DD HH:MM:SS").
+ * If the index can't be loaded, list the folder through the GitHub contents API instead.
+ */
+export async function fetchImageIndex(
+  indexUrl: string,
+  fallbackContentsUrl: string,
+): Promise<Image[]> {
   try {
-    const response = await fetch(`${path}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const response = await fetch(indexUrl, { cache: "no-cache" });
     if (!response.ok) {
-      throw new Error("Failed to fetch repository contents");
+      throw new Error(`index.json: HTTP ${response.status}`);
     }
-    const data = await response.json();
-
-    const images: Image[] = data
-      .filter(
-        (item: any) =>
-          item.type === "file" && item.path.match(/\.(jpeg|jpg|png|gif|webp)$/i)
-      )
-      .map((item: any) => ({
-        name: item.name,
-        url: item.download_url,
+    const entries: IndexEntry[] = await response.json();
+    return entries
+      .filter((entry) => IMAGE_FILE.test(entry.name))
+      .map((entry) => ({
+        name: entry.name,
+        url: new URL(entry.url ?? entry.name, indexUrl).href,
+        date: entry.date ?? null,
       }))
-      .sort((a: Image, b: Image) => {
-        const regex = /\d+/g;
-        const aNumber = Number(a.name.match(regex)?.[0]);
-        const bNumber = Number(b.name.match(regex)?.[0]);
-        return aNumber - bNumber;
-      });
+      .sort(byNumberInName);
+  } catch (error) {
+    console.warn("Falling back to the GitHub contents API:", error);
+    return fetchImagesFromRepo(fallbackContentsUrl);
+  }
+}
 
-    return images;
+/** List image files in a public repo folder through the anonymous GitHub contents API. */
+export async function fetchImagesFromRepo(contentsUrl: string): Promise<Image[]> {
+  try {
+    const response = await fetch(contentsUrl);
+    if (!response.ok) {
+      throw new Error(`contents API: HTTP ${response.status}`);
+    }
+    const entries: ContentsEntry[] = await response.json();
+    return entries
+      .filter((entry) => entry.type === "file" && IMAGE_FILE.test(entry.path))
+      .map((entry) => ({
+        name: entry.name,
+        url: entry.download_url,
+        date: null,
+      }))
+      .sort(byNumberInName);
   } catch (error) {
     console.error("Error:", error);
     return [];
