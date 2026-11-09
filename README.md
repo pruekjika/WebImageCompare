@@ -1,54 +1,27 @@
-### ถ้าไม่ได้ทำนานๆจะลืมเรื่องนี้
+# WebImageCompare
 
-forget how to do git secret env
+Site: https://pruekjika.github.io/WebImageCompare/
 
-### แก้โดย
+Compare two garden drone photos from [GardenImgDB](https://github.com/pruekjika/GardenImgDB) with a slider.
 
-1. get new token from `setting > developer setting > personal access token > Token (classic) > The value of garden — repo` is the value that need to write in `.env` file
-2. add `.env` file that have this one line `VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+## How it loads images (no token)
 
-### thing that needed
+ไม่ต้องใช้ token, `.env` หรือ GitHub secret แล้ว. Don't add a token back: anything in `VITE_*` is built
+into the public site, so anyone can copy it (that's how the old tokens leaked).
 
-1. Environment secrets
-2. token
+- **Photo list + dates:** `ImageDB/index.json` from raw.githubusercontent.com
+  (`[{"name": "0.webp", "date": "2022:09:08 17:21:38"}, ...]`). GardenImgDB's `main.py` and
+  `batch_align.py` rewrite it, so commit it together with the new `.webp`.
+- **Photos:** raw.githubusercontent.com. Not counted in the GitHub API rate limit.
+- **If `index.json` can't be loaded:** falls back to the GitHub contents API without a token
+  (60 requests/hour per visitor IP), and reads dates from each photo's EXIF.
+- **360 gallery:** GardenImg360 through the GitHub contents API without a token, 1 request per visit.
 
----
-
-The Repository secrets is `not` needed
-this is my first time pull image from github folder
-it have limit to Rate-limits (up to `60 per-hour` for anonymous, up to 5,000 per-hour for authenticated)
-
-[How to get a file via GitHub APIs - Stack Overflow](https://stackoverflow.com/questions/9272535/how-to-get-a-file-via-github-apis)
-
-need to do authenticated to make it more stable by
-
-1.  create `.env` file and add line below to pc
+## Develop
 
 ```
-VITE_GITHUB_ACCESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+npm ci
+npm run dev
 ```
 
-2. and add github secret in github
-
-3. ยังคงการเรียก header ตามด้านล่าง
-
-```tsx
-const response = await fetch(
-  `https://api.github.com/repos/${owner}/${repo}/contents/ImageDB/Fixed/`,
-  {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  },
-);
-```
-
-4. ให้ทำการ build vite ผ่าน github action โดย ทำตามนี้
-
-   [Deploying a Vite app on GitHub Pages using GitHub Actions with GitHub Secrets - DEV Community](https://dev.to/dwtoledo/deploying-a-vite-app-on-github-pages-using-github-actions-with-github-secrets-1hn0)
-
-### to do
-
-- [ ] [ My Favorite UI Library Keeps Getting Better - YouTube](https://youtu.be/zlX0lrX2oLA?si=DDhNYU6L81hFCC9d&t=136) at time stamp change choose image to use button drawer for better ux design
-
-- [ ] fullscreen still not work on iphone mobile
+Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yaml`).
