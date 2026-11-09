@@ -4,14 +4,33 @@ import {
   ReactCompareSliderHandle,
 } from "react-compare-slider";
 
-const CompareImageSlider = (props: { img1: string; img2: string }) => {
+const CompareImageSlider = (props: {
+  img1: string;
+  img2: string;
+  label1: string;
+  label2: string;
+  onError1: () => void;
+  onError2: () => void;
+}) => {
   return (
     <div>
       <ReactCompareSlider
         onlyHandleDraggable={true}
         boundsPadding={0}
-        itemOne={<ReactCompareSliderImage alt='Image one' src={props.img1} />}
-        itemTwo={<ReactCompareSliderImage alt='Image two' src={props.img2} />}
+        itemOne={
+          <ReactCompareSliderImage
+            alt={`Photo ${props.label1}`}
+            src={props.img1}
+            onError={props.onError1}
+          />
+        }
+        itemTwo={
+          <ReactCompareSliderImage
+            alt={`Photo ${props.label2}`}
+            src={props.img2}
+            onError={props.onError2}
+          />
+        }
         handle={
           <ReactCompareSliderHandle
             buttonStyle={{
@@ -20,9 +39,6 @@ const CompareImageSlider = (props: { img1: string; img2: string }) => {
               WebkitBackdropFilter: "none",
               boxShadow: "none",
             }}
-            // linesStyle={{
-            //   opacity: 0,
-            // }}
           />
         }
         keyboardIncrement='5%'

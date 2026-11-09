@@ -1,21 +1,20 @@
 import "./Image360.css";
 
-const ImageObject360 = (props: {
-  imgUrl: string;
-  imgName: string;
-  onClick: () => void;
-}) => {
+const ImageObject360 = (props: { imgUrl: string; imgName: string; href: string }) => {
+  const label = props.imgName.replace("__", "").replace(".webp", "").replace(".jpg", "");
   return (
-    <div className={`image-container-360`} onClick={props.onClick}>
-      <img src={props.imgUrl} alt={props.imgName} className='image-360' />
-      <div className='center-text'>
-        <p className='text-img-name'>{`${props.imgName
-          .replace("__", "")
-          .replace(".webp", "")
-          .replace(".jpg", "")}`}</p>
-        {/* <p className='text-img-date'>{`${props.imgName}`}</p> */}
+    <a
+      className='image-container-360'
+      href={props.href}
+      target='_blank'
+      rel='noopener noreferrer'
+      title={`Open 360 photo ${label} in a new tab`}
+    >
+      <img src={props.imgUrl} alt={`360 photo ${label}`} className='image-360' loading='lazy' />
+      <div className='center-text' aria-hidden='true'>
+        <p className='text-img-name'>{label}</p>
       </div>
-    </div>
+    </a>
   );
 };
 

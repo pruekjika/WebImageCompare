@@ -20,11 +20,43 @@ interface ContentsEntry {
   download_url: string;
 }
 
+export type LoadState =
+  | { status: "loading" }
+  | { status: "ready" }
+  | { status: "error"; message: string };
+
+/** A failed GitHub request, with what the visitor can do about it. */
+export class LoadError extends Error {}
+
+/** Turn any fetch failure into one sentence a visitor can act on. */
+export function describeLoadError(error: unknown): string {
+  if (error instanceof LoadError) return error.message;
+  if (error instanceof TypeError || !navigator.onLine) {
+    return "Can't reach GitHub. Check your connection and try again.";
+  }
+  return "Something went wrong reading it from GitHub. Try again.";
+}
+
+async function httpError(response: Response, what: string): Promise<LoadError> {
+  const remaining = response.headers.get("x-ratelimit-remaining");
+  const reset = Number(response.headers.get("x-ratelimit-reset"));
+  if ((response.status === 403 || response.status === 429) && remaining === "0") {
+    const minutes = reset
+      ? Math.max(1, Math.ceil((reset * 1000 - Date.now()) / 60000))
+      : 60;
+    return new LoadError(
+      `GitHub's hourly limit for this network is used up. Try again in about ${minutes} min.`,
+    );
+  }
+  return new LoadError(`GitHub answered HTTP ${response.status} for the ${what}. Try again later.`);
+}
+
 /**
  * Read a gallery's index.json (an array of { name, url?, date? }).
  * `url` defaults to `name` and is resolved against the index's own URL;
  * `date` is the EXIF DateTimeOriginal string ("YYYY:MM:DD HH:MM:SS").
  * If the index can't be loaded, list the folder through the GitHub contents API instead.
+ * Throws a LoadError when both fail.
  */
 export async function fetchImageIndex(
   indexUrl: string,
@@ -37,7 +69,7 @@ export async function fetchImageIndex(
     }
     const entries: IndexEntry[] = await response.json();
     return entries
-      .filter((entry) => IMAGE_FILE.test(entry.name))
+      .filter((entry) => typeof entry?.name === "string" && IMAGE_FILE.test(entry.name))
       .map((entry) => ({
         name: entry.name,
         url: new URL(entry.url ?? entry.name, indexUrl).href,
@@ -50,24 +82,25 @@ export async function fetchImageIndex(
   }
 }
 
-/** List image files in a public repo folder through the anonymous GitHub contents API. */
+/**
+ * List image files in a public repo folder through the anonymous GitHub contents API.
+ * Throws a LoadError (rate limit, HTTP error) or a TypeError (offline) on failure.
+ */
 export async function fetchImagesFromRepo(contentsUrl: string): Promise<Image[]> {
-  try {
-    const response = await fetch(contentsUrl);
-    if (!response.ok) {
-      throw new Error(`contents API: HTTP ${response.status}`);
-    }
-    const entries: ContentsEntry[] = await response.json();
-    return entries
-      .filter((entry) => entry.type === "file" && IMAGE_FILE.test(entry.path))
-      .map((entry) => ({
-        name: entry.name,
-        url: entry.download_url,
-        date: null,
-      }))
-      .sort(byNumberInName);
-  } catch (error) {
-    console.error("Error:", error);
-    return [];
+  const response = await fetch(contentsUrl);
+  if (!response.ok) {
+    throw await httpError(response, "photo list");
   }
+  const entries: ContentsEntry[] = await response.json();
+  if (!Array.isArray(entries)) {
+    throw new LoadError("GitHub sent back something that isn't a photo list. Try again later.");
+  }
+  return entries
+    .filter((entry) => entry.type === "file" && IMAGE_FILE.test(entry.path))
+    .map((entry) => ({
+      name: entry.name,
+      url: entry.download_url,
+      date: null,
+    }))
+    .sort(byNumberInName);
 }

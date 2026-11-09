@@ -1,9 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import CompareImageSlider from "./CompareImageSlider.js";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import "./ImageGallery.css";
 
-const CompareZoomPanPinch = (props: { img1: string; img2: string }) => {
+const CompareZoomPanPinch = (props: {
+  img1: string;
+  img2: string;
+  label1: string;
+  label2: string;
+}) => {
+  // Photos that failed to load, by URL, so a bad file says so instead of showing a blank half.
+  const [failed, setFailed] = useState<Record<string, true>>({});
+  const markFailed = (url: string) => () =>
+    setFailed((prev) => (prev[url] ? prev : { ...prev, [url]: true }));
+
+  const broken = [
+    failed[props.img1] ? props.label1 : null,
+    failed[props.img2] ? props.label2 : null,
+  ].filter(Boolean);
+
   return (
     <div className='full-container'>
       <div className='container'>
@@ -17,12 +32,24 @@ const CompareZoomPanPinch = (props: { img1: string; img2: string }) => {
           {() => (
             <React.Fragment>
               <TransformComponent>
-                {<CompareImageSlider img1={props.img1} img2={props.img2} />}
+                <CompareImageSlider
+                  img1={props.img1}
+                  img2={props.img2}
+                  label1={props.label1}
+                  label2={props.label2}
+                  onError1={markFailed(props.img1)}
+                  onError2={markFailed(props.img2)}
+                />
               </TransformComponent>
             </React.Fragment>
           )}
         </TransformWrapper>
       </div>
+      {broken.length > 0 ? (
+        <p className='compare-error' role='alert'>
+          Photo {broken.join(" and ")} didn't load. Pick another photo.
+        </p>
+      ) : null}
     </div>
   );
 };

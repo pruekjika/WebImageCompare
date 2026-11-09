@@ -30,6 +30,20 @@
   overflow: hidden;
 
   transition: all 150ms ease-in-out;
+  /* an <a>: no link colour or underline */
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+
+.image-container-360.is-placeholder {
+  cursor: default;
+  background-color: rgba(32, 32, 32, 0.6);
+}
+
+.image-container-360:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.92);
+  outline-offset: 2px;
 }
 
 .text-img-name {
@@ -44,16 +58,19 @@
   filter: brightness(30%);
 }
 
-.image-container-360:hover {
+.image-container-360:not(.is-placeholder):hover,
+.image-container-360:focus-visible {
   scale: 1.01;
   border-radius: 1rem;
 }
 
-.image-container-360:hover .text-img-name {
+.image-container-360:hover .text-img-name,
+.image-container-360:focus-visible .text-img-name {
   color: rgba(255, 255, 255, 0);
 }
 
-.image-container-360:hover .image-360 {
+.image-container-360:hover .image-360,
+.image-container-360:focus-visible .image-360 {
   filter: brightness(100%);
 }
 

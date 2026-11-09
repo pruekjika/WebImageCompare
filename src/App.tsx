@@ -1,43 +1,74 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
-import { fetchImageIndex, fetchImagesFromRepo } from "./api";
+import ErrorBoundary from "./Components/ErrorBoundary";
+import {
+  LoadState,
+  describeLoadError,
+  fetchImageIndex,
+  fetchImagesFromRepo,
+} from "./api";
 import { Image } from "./Image";
 
-function App() {
-  const [images, setImages] = useState<Image[]>([]);
-  useEffect(() => {
-    fetchImageIndex(
-      "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/index.json",
-      "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/"
-    )
-      .then((images) => {
-        setImages(images);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }, []);
+const loadGardenImages = () =>
+  fetchImageIndex(
+    "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/index.json",
+    "https://api.github.com/repos/pruekjika/GardenImgDB/contents/ImageDB/",
+  );
 
-  const [images360, setImages360] = useState<Image[]>([]);
+const load360Images = () =>
+  fetchImagesFromRepo("https://api.github.com/repos/pruekjika/GardenImg360/contents/");
+
+/** Load a gallery once, keep the last good list on a failed retry. */
+function useGallery(loader: () => Promise<Image[]>) {
+  const [images, setImages] = useState<Image[]>([]);
+  const [load, setLoad] = useState<LoadState>({ status: "loading" });
+  const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
-    fetchImagesFromRepo(
-      "https://api.github.com/repos/pruekjika/GardenImg360/contents/"
-    )
-      .then((images) => {
-        setImages360(images);
+    let cancelled = false;
+    setLoad({ status: "loading" });
+    loader()
+      .then((loaded) => {
+        if (cancelled) return;
+        setImages(loaded);
+        setLoad({ status: "ready" });
       })
       .catch((error) => {
+        if (cancelled) return;
         console.error("Error:", error);
+        setLoad({ status: "error", message: describeLoadError(error) });
       });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [loader, attempt]);
+
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
+  return { images, load, retry };
+}
+
+function App() {
+  const garden = useGallery(loadGardenImages);
+  const garden360 = useGallery(load360Images);
 
   return (
     <>
-      {/* image gallery if final call because it easier to send image button data to compare */}
-      <Image360View images={images360} />
-      <ImageGallery images={images} />
+      <ErrorBoundary section='The 360 photos'>
+        <Image360View
+          images={garden360.images}
+          load={garden360.load}
+          onRetry={garden360.retry}
+        />
+      </ErrorBoundary>
+      <ErrorBoundary section='Image compare'>
+        <ImageGallery
+          images={garden.images}
+          load={garden.load}
+          onRetry={garden.retry}
+        />
+      </ErrorBoundary>
     </>
   );
 }
