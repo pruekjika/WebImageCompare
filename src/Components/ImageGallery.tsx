@@ -2,7 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ImageObject, { Slot } from "./ImageObject";
 import CompareZoomPanPinch from "./CompareZoomPanPinch";
 import LoadStatus from "./LoadStatus";
-import { CollapseIcon, ExpandIcon, PauseIcon, PlayIcon, SwapIcon } from "./Icons";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CollapseIcon,
+  ExpandIcon,
+  PauseIcon,
+  PlayIcon,
+  SwapIcon,
+} from "./Icons";
 import { Image } from "../Image";
 import { LoadState, thumbUrlOf } from "../api";
 import "./ImageGallery.css";
@@ -97,6 +105,11 @@ const preload = (url: string) =>
 const prefersReducedMotion = () =>
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
+type Edge = "left" | "right" | null;
+
+const frameOf = (strip: HTMLElement, label: string) =>
+  strip.querySelector<HTMLElement>(`[data-label="${CSS.escape(label)}"]`);
+
 export interface ImageGalleryProps {
   images: Image[];
   load: LoadState;
@@ -120,6 +133,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const isFullscreen = isNativeFullscreen || isPseudoFullscreen;
   const [exifDateByUrl, setExifDateByUrl] = useState<Record<string, string>>({});
+  // Which side of the timeline a slot's frame has scrolled off to, if any.
+  const [edges, setEdges] = useState<Record<Slot, Edge>>({ a: null, b: null });
 
   // ---- the photo list, by label ----
   const order = useMemo(() => images.map(labelOf), [images]);
@@ -207,6 +222,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     setPlaying(false);
     setPair((p) => ({ a: p.b, b: p.a }));
   };
+  // The key handler is bound once; these refs give it the current swap and fullscreen.
+  const swapRef = useRef(swap);
+  swapRef.current = swap;
+  const toggleFullscreenRef = useRef<() => Promise<void>>(async () => undefined);
 
   const step = useCallback(
     (slot: Slot, delta: number) => {
@@ -225,10 +244,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
   // Left/Right step B through the timeline, with Shift step A. The slider handle keeps its own arrows.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== "ArrowLeft" && event.code !== "ArrowRight") return;
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, select, [contenteditable], [role='slider']")) return;
+      if (target?.closest("input, textarea, select, [contenteditable]")) return;
+      // F and S read the physical key, so they work on Thai and other layouts too.
+      if ((event.code === "KeyF" || event.code === "KeyS") && !event.shiftKey) {
+        event.preventDefault();
+        if (event.repeat) return;
+        if (event.code === "KeyF") void toggleFullscreenRef.current();
+        else swapRef.current();
+        return;
+      }
+      if (event.code !== "ArrowLeft" && event.code !== "ArrowRight") return;
+      if (target?.closest("[role='slider']")) return;
       event.preventDefault();
       step(event.shiftKey ? "a" : "b", event.code === "ArrowRight" ? 1 : -1);
     };
@@ -292,22 +320,50 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     });
   };
 
-  // Keep the photo that just moved in view on the timeline, without scrolling the page.
-  useEffect(() => {
+  /** Centre a photo's frame on the timeline (never scrolls the page). */
+  const revealFrame = useCallback((label: string, force = false) => {
     const strip = timelineRef.current;
-    if (!strip) return;
-    const label = pair[lastMoved.current];
-    const frame = strip.querySelector<HTMLElement>(`[data-label="${CSS.escape(label)}"]`);
-    if (!frame) return;
+    const frame = strip ? frameOf(strip, label) : null;
+    if (!strip || !frame) return;
     const left = frame.offsetLeft;
     const right = left + frame.offsetWidth;
     const inView = left >= strip.scrollLeft && right <= strip.scrollLeft + strip.clientWidth;
-    if (inView && !playing) return;
+    if (inView && !force) return;
     strip.scrollTo({
       left: left - strip.clientWidth / 2 + frame.offsetWidth / 2,
       behavior: prefersReducedMotion() ? "auto" : "smooth",
     });
-  }, [pair, playing, order.length]);
+  }, []);
+
+  // Keep the photo that just moved in view on the timeline.
+  useEffect(() => {
+    revealFrame(pair[lastMoved.current], playing);
+  }, [pair, playing, order.length, revealFrame]);
+
+  // Track whether A or B has scrolled out of the timeline, to point at it from the edge.
+  useEffect(() => {
+    const strip = timelineRef.current;
+    if (!strip) return;
+    const sideOf = (label: string): Edge => {
+      const frame = frameOf(strip, label);
+      if (!frame) return null;
+      const middle = frame.offsetLeft - strip.scrollLeft + frame.offsetWidth / 2;
+      if (middle < 0) return "left";
+      if (middle > strip.clientWidth) return "right";
+      return null;
+    };
+    const measure = () => {
+      const next = { a: sideOf(pair.a), b: sideOf(pair.b) };
+      setEdges((prev) => (prev.a === next.a && prev.b === next.b ? prev : next));
+    };
+    measure();
+    strip.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      strip.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [pair, order.length]);
 
   // A vertical wheel scrolls the timeline sideways, until it reaches an end.
   useEffect(() => {
@@ -379,6 +435,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     }
     setIsPseudoFullscreen(true);
   };
+  toggleFullscreenRef.current = toggleFullscreen;
 
   // ---- render ----
   const isEmpty = images.length === 0;
@@ -391,7 +448,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
       className='slot'
       data-slot={slot}
       aria-pressed={activeSlot === slot}
-      onClick={() => setActiveSlot(slot)}
+      onClick={() => {
+        setActiveSlot(slot);
+        revealFrame(label, true);
+      }}
       title={`Next photo you tap goes to ${slot.toUpperCase()}`}
     >
       <span className='slot-tag'>{slot.toUpperCase()}</span>
@@ -423,6 +483,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
       title='Timelapse speed'
     >
       {SPEEDS[speed].label}
+      <span className='btn-text speed-word'>speed</span>
     </button>
   );
 
@@ -466,7 +527,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
             className='btn btn--icon pair-swap'
             onClick={swap}
             aria-label='Swap A and B'
-            title='Swap A and B'
+            aria-keyshortcuts='S'
+            title='Swap A and B (S)'
           >
             <SwapIcon />
           </button>
@@ -483,6 +545,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
             type='button'
             className='btn'
             onClick={toggleFullscreen}
+            aria-keyshortcuts='F'
+            title='Fullscreen (F)'
           >
             <ExpandIcon />
             <span className='btn-text'>Fullscreen</span>
@@ -501,19 +565,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
           {/* Remount on a size change so the zoom layer re-centres in the new frame. */}
           <CompareZoomPanPinch
             key={isFullscreen ? "fullscreen" : "inline"}
-            img1={urlA}
-            img2={urlB}
-            label1={pair.a}
-            label2={pair.b}
+            a={{ url: urlA, label: pair.a, date: dateA }}
+            b={{ url: urlB, label: pair.b, date: dateB }}
           />
-          <span className='stage-label' data-slot='a' aria-hidden='true'>
-            <b>A</b> {pair.a}
-            {dateA ? <span>{dateA}</span> : null}
-          </span>
-          <span className='stage-label' data-slot='b' aria-hidden='true'>
-            <b>B</b> {pair.b}
-            {dateB ? <span>{dateB}</span> : null}
-          </span>
           {isFullscreen ? (
             <div className='stage-controls'>
               <div className='play-group'>
@@ -544,7 +598,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
             Tap a photo to set <b data-slot={activeSlot}>{activeSlot.toUpperCase()}</b>
             <span className='timeline-keys'>
               {" "}
-              · <kbd>←</kbd> <kbd>→</kbd> step B, add <kbd>Shift</kbd> for A
+              · <kbd>←</kbd> <kbd>→</kbd> step B, add <kbd>Shift</kbd> for A ·{" "}
+              <kbd>S</kbd> swap · <kbd>F</kbd> fullscreen
             </span>
           </p>
         </div>
@@ -566,20 +621,44 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
             Loading photos…
           </span>
         ) : null}
-        <div
-          ref={timelineRef}
-          className='timeline'
-          aria-busy={load.status === "loading"}
-          aria-label='Photo timeline'
-          role='group'
-        >
-          {showPlaceholders
-            ? Array.from({ length: PLACEHOLDER_FRAMES }, (_, i) => (
-                <span key={i} className='frame is-placeholder' aria-hidden='true'>
-                  <span className='frame-image' />
-                </span>
-              ))
-            : frames}
+        <div className='timeline-rail'>
+          <div
+            ref={timelineRef}
+            className='timeline'
+            aria-busy={load.status === "loading"}
+            aria-label='Photo timeline'
+            role='group'
+          >
+            {showPlaceholders
+              ? Array.from({ length: PLACEHOLDER_FRAMES }, (_, i) => (
+                  <span key={i} className='frame is-placeholder' aria-hidden='true'>
+                    <span className='frame-image' />
+                  </span>
+                ))
+              : frames}
+          </div>
+          {(["left", "right"] as const).map((side) => {
+            const offscreen = (["a", "b"] as const).filter((s) => edges[s] === side);
+            if (offscreen.length === 0) return null;
+            return (
+              <div key={side} className='edge-chips' data-side={side}>
+                {offscreen.map((s) => (
+                  <button
+                    key={s}
+                    type='button'
+                    className='edge-chip'
+                    onClick={() => revealFrame(pair[s], true)}
+                    aria-label={`Show ${s.toUpperCase()}, photo ${pair[s]}, on the timeline`}
+                  >
+                    {side === "left" ? <ChevronLeftIcon /> : null}
+                    <b>{s.toUpperCase()}</b>
+                    <span>{pair[s]}</span>
+                    {side === "right" ? <ChevronRightIcon /> : null}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

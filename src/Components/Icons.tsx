@@ -45,3 +45,15 @@ export const CollapseIcon = () => (
     <path d='M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5' />
   </Svg>
 );
+
+export const ChevronLeftIcon = () => (
+  <Svg>
+    <path d='m14.5 6-6 6 6 6' />
+  </Svg>
+);
+
+export const ChevronRightIcon = () => (
+  <Svg>
+    <path d='m9.5 6 6 6-6 6' />
+  </Svg>
+);

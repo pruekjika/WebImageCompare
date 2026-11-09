@@ -13,6 +13,8 @@ const CompareImageSlider = (props: {
   img2: string;
   label1: string;
   label2: string;
+  onLoad1: () => void;
+  onLoad2: () => void;
   onError1: () => void;
   onError2: () => void;
 }) => (
@@ -24,6 +26,7 @@ const CompareImageSlider = (props: {
         alt={`Photo ${props.label1}`}
         src={props.img1}
         style={imageStyle}
+        onLoad={props.onLoad1}
         onError={props.onError1}
       />
     }
@@ -32,6 +35,7 @@ const CompareImageSlider = (props: {
         alt={`Photo ${props.label2}`}
         src={props.img2}
         style={imageStyle}
+        onLoad={props.onLoad2}
         onError={props.onError2}
       />
     }

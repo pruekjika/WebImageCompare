@@ -68,7 +68,8 @@
 .slot-tag,
 .frame-tag,
 .stage-label b,
-.timeline-hint b {
+.timeline-hint b,
+.edge-chip b {
   display: inline-grid;
   place-items: center;
   min-width: 1.35rem;
@@ -134,6 +135,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* "1× speed": the word says what the number is; it drops to screen-reader only on phones. */
+.btn--speed .speed-word {
+  margin-left: -0.15rem;
+  font-weight: 500;
+  color: var(--c-ink-muted);
+}
+
 /* ---------- Stage ---------- */
 .stage {
   position: relative;
@@ -141,9 +149,14 @@
   padding: 0 var(--gutter);
 }
 
+/* The frame hugs the photos (aligned 4:3 shots), so the A/B labels sit on the photo's
+   corners instead of out in the letterbox. */
 .stage-frame {
   position: relative;
   height: 100%;
+  aspect-ratio: var(--photo-ratio);
+  max-width: 100%;
+  margin-inline: auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: #0b0b0b;
@@ -169,6 +182,44 @@
 .stage-label span {
   font-weight: 500;
   color: var(--c-ink-muted);
+}
+
+/* A photo still on its way: a thin sweep under the label, shown only if it takes a moment. */
+.stage-label[data-loading]::after {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, var(--c-ink-strong), transparent) 0 0 / 50% 100%
+    no-repeat;
+  animation:
+    stage-appear 160ms ease-out 350ms both,
+    stage-sweep 900ms linear infinite;
+}
+
+@keyframes stage-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes stage-sweep {
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-label[data-loading]::after {
+    animation: stage-appear 160ms ease-out 350ms both;
+    background: var(--c-ink-faint);
+  }
 }
 
 .stage-label[data-slot="a"] {
@@ -221,8 +272,10 @@
   z-index: 100;
 }
 
+/* Fullscreen gives the whole screen to the photos, for zooming in. */
 .stage:fullscreen .stage-frame,
 .stage.is-pseudo-fullscreen .stage-frame {
+  aspect-ratio: auto;
   border-radius: 0;
 }
 
@@ -282,6 +335,74 @@
   border: 1px solid var(--c-line);
   border-radius: 0.25rem;
   color: var(--c-ink);
+}
+
+.timeline-rail {
+  position: relative;
+}
+
+/* A or B scrolled out of the strip: a chip on that edge points at it and brings it back. */
+.edge-chips {
+  position: absolute;
+  top: 0.25rem;
+  height: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.edge-chips[data-side="left"] {
+  left: 0;
+}
+
+.edge-chips[data-side="right"] {
+  right: 0;
+  align-items: flex-end;
+}
+
+.edge-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1.9rem;
+  padding: 0 0.5rem 0 0.3rem;
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius-sm);
+  background: rgba(16, 16, 16, 0.9);
+  color: var(--c-ink-strong);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+
+.edge-chips[data-side="right"] .edge-chip {
+  padding: 0 0.3rem 0 0.5rem;
+}
+
+.edge-chip:hover {
+  background: var(--c-tray);
+}
+
+.edge-chip:focus-visible {
+  outline: 2px solid var(--c-ink-strong);
+  outline-offset: 2px;
+}
+
+.edge-chip svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: var(--c-ink-muted);
+}
+
+.edge-chip b {
+  min-width: 1.15rem;
+  height: 1.15rem;
+  font-size: 0.7rem;
 }
 
 .timeline {
@@ -355,7 +476,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.62;
+  opacity: 0.75;
   transition: opacity 160ms ease-out;
 }
 
@@ -504,7 +625,7 @@
   /* Size the stage to the photos (about 4:3) instead of letterboxing them. */
   .stage-frame {
     height: auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: var(--photo-ratio);
     max-height: 68dvh;
   }
 

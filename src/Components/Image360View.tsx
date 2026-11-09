@@ -33,7 +33,7 @@ const Image360View: React.FC<Image360ViewProps> = ({ images, load, onRetry }) =>
       ) : null}
       {load.status === "loading" && isEmpty ? (
         <span className='sr-only' role='status'>
-          Loading 360 photos…
+          Loading 360 photosâ€¦
         </span>
       ) : null}
       <div className='image-gallery-360' aria-busy={load.status === "loading"}>

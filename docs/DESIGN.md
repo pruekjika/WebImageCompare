@@ -30,7 +30,7 @@ Tokens live on `:root` in [src/index.css](../src/index.css). Component styles ar
 | `--c-ink` | white .87 | Body text. |
 | `--c-ink-muted` | white .66 | Dates, the bar title, hints. |
 | `--c-ink-faint` | white .50 | Resting frame dates, year marks, counts (≥4.5:1 on the bg). |
-| `--c-line` / `--c-line-strong` | white .14 / .32 | Hairlines and borders; strong marks the active slot. |
+| `--c-line` / `--c-line-strong` | white .14 / .32 | Hairlines and borders; strong marks the active slot and edge chips. |
 
 The stage backing is `#0b0b0b`, a step darker than the page, so the letterbox reads as the frame.
 
@@ -66,7 +66,9 @@ The stage backing is `#0b0b0b`, a step darker than the page, so the letterbox re
   timeline) at `height: 100dvh` (min 34rem), so the whole compare screen is the first viewport.
 - **Bar** (`.compare-bar`): title on the left, the pair centred (A slot, swap, B slot,
   "N months apart"), and the actions (Play timelapse, Fullscreen) on the right.
-- **Stage** (`.stage` > `.stage-frame`): fills the remaining height. The photos use
+- **Stage** (`.stage` > `.stage-frame`): fills the remaining height, and the frame takes the photos'
+  shape (`--photo-ratio`, 4:3) and centres, so the A/B labels sit on the photo's corners instead of
+  out in the letterbox. Fullscreen drops the ratio and gives the whole screen to the photos. They use
   `object-fit: contain`, so both letterbox identically and the handle compares the same ground.
   Zoom starts at 1 (fit) and goes up to 20.
 - **Timeline** (`.timeline`): one horizontal row of frames in archive order, with a year mark
@@ -105,7 +107,10 @@ Flat and tonal: black page, darker stage, grey trays. Things on a photo sit on
 ### Timeline frame (`ImageObject`, `.frame`)
 
 - A 72px square thumbnail, with the number and date below it. A frame in the comparison gets a cyan border,
-  a cyan A/B tag in the corner, and full-opacity image and text. At rest the thumbnail sits at 62% opacity.
+  a cyan A/B tag in the corner, and full-opacity image and text. At rest the thumbnail sits at 75% opacity.
+- **Edge chip** (`.edge-chip`): when A or B has scrolled out of the strip, a scrim chip on that edge
+  (`‹ A 2` / `B 85 ›`, chevron icons) points at it, and a tap centres it. Clicking a slot in the bar
+  also centres its frame.
 - Thumbnails come from `index.json`'s optional `thumb` field, or from `wsrv.nl` resizing the full photo
   (144px webp, about 5 KB) and lazy-loading it. If a thumbnail fails, the frame falls back to number and date only.
 - Loading: 14 placeholder frames plus a visually hidden "Loading photos…".
@@ -114,6 +119,8 @@ Flat and tonal: black page, darker stage, grey trays. Things on a photo sit on
 
 - react-compare-slider inside react-zoom-pan-pinch; only the handle drags, and the keyboard step is 5%.
 - Corner labels: `A 11 22.09.21` top-left and `B 85 24.08.10` top-right, on scrim, `pointer-events: none`.
+  A photo still loading shows a 2px sweep under its label, faded in after 350ms so cached photos
+  (the timelapse preloads) never flash it.
 - A failed photo shows a pill at the bottom: "Photo 71 didn't load. Pick another photo."
 - Fullscreen uses the Fullscreen API, or `.is-pseudo-fullscreen` on iPhone. Play and Exit fullscreen sit
   bottom-centre on scrim, and Esc exits.
@@ -122,9 +129,10 @@ Flat and tonal: black page, darker stage, grey trays. Things on a photo sit on
 
 - The pair is kept in the URL (`?a=2&b=71`), so a comparison can be shared as a link. An unknown number falls back to 2 / 71.
 - ←/→ step B through the timeline, and with Shift they step A. They are ignored while the slider handle has focus.
+  S swaps A and B, F toggles fullscreen. All read `event.code`, so they work on any keyboard layout.
 - **Play timelapse** walks B forward one photo at a time, loading the next 4 photos ahead.
   It restarts after A when B is at the end, and any manual choice pauses it.
-- **Speed** is a button joined to Play (`.play-group`) that cycles 0.5× / 1× / 2× / 4×
+- **Speed** is a button joined to Play (`.play-group`), labelled "1× speed" (the word is screen-reader only on phones), that cycles 0.5× / 1× / 2× / 4×
   (1200 / 600 / 300 / 150ms per photo). It defaults to 1×, and each browser remembers its choice in `localStorage`.
 
 ### Button (`.btn`)
