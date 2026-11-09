@@ -1,4 +1,3 @@
-import "./App.css";
 import { useCallback, useEffect, useState } from "react";
 import ImageGallery from "./Components/ImageGallery";
 import Image360View from "./Components/Image360View";
@@ -53,8 +52,12 @@ function App() {
   const garden = useGallery(loadGardenImages);
   const garden360 = useGallery(load360Images);
 
+  // Compare first: it's the page's main job. The 360 panoramas follow below the fold.
   return (
-    <>
+    <main>
+      <ErrorBoundary section='Image compare'>
+        <ImageGallery images={garden.images} load={garden.load} onRetry={garden.retry} />
+      </ErrorBoundary>
       <ErrorBoundary section='The 360 photos'>
         <Image360View
           images={garden360.images}
@@ -62,14 +65,7 @@ function App() {
           onRetry={garden360.retry}
         />
       </ErrorBoundary>
-      <ErrorBoundary section='Image compare'>
-        <ImageGallery
-          images={garden.images}
-          load={garden.load}
-          onRetry={garden.retry}
-        />
-      </ErrorBoundary>
-    </>
+    </main>
   );
 }
 

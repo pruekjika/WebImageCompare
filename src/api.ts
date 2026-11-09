@@ -11,6 +11,7 @@ interface IndexEntry {
   name: string;
   url?: string;
   date?: string | null;
+  thumb?: string;
 }
 
 interface ContentsEntry {
@@ -19,6 +20,14 @@ interface ContentsEntry {
   path: string;
   download_url: string;
 }
+
+/**
+ * A ~5 KB square preview for the timeline. Uses the index's own `thumb` when GardenImgDB
+ * provides one, else a public resize proxy (wsrv.nl) over the full photo: no key, no backend.
+ */
+export const thumbUrlOf = (image: Image): string =>
+  image.thumb ??
+  `https://wsrv.nl/?url=${encodeURIComponent(image.url)}&w=144&h=144&fit=cover&output=webp&q=60`;
 
 export type LoadState =
   | { status: "loading" }
@@ -74,6 +83,7 @@ export async function fetchImageIndex(
         name: entry.name,
         url: new URL(entry.url ?? entry.name, indexUrl).href,
         date: entry.date ?? null,
+        thumb: entry.thumb ? new URL(entry.thumb, indexUrl).href : undefined,
       }))
       .sort(byNumberInName);
   } catch (error) {

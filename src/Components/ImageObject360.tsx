@@ -11,9 +11,9 @@ const ImageObject360 = (props: { imgUrl: string; imgName: string; href: string }
       title={`Open 360 photo ${label} in a new tab`}
     >
       <img src={props.imgUrl} alt={`360 photo ${label}`} className='image-360' loading='lazy' />
-      <div className='center-text' aria-hidden='true'>
-        <p className='text-img-name'>{label}</p>
-      </div>
+      <span className='pano-name' aria-hidden='true'>
+        {label}
+      </span>
     </a>
   );
 };

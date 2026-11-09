@@ -1,24 +1,45 @@
+import { useState } from "react";
 import "./ImageGallery.css";
 
+export type Slot = "a" | "b";
+
+/** One frame on the timeline: a small preview, its number and date, and its A/B tag. */
 const ImageObject = (props: {
-  imgName: string;
-  imgDate?: string;
-  selected: boolean;
+  label: string;
+  date?: string;
+  thumb: string;
+  slot: Slot | null;
   onClick: () => void;
 }) => {
-  const label = props.imgName.replace(".webp", "").replace(".jpg", "");
+  const [thumbFailed, setThumbFailed] = useState(false);
+  const slotName = props.slot ? props.slot.toUpperCase() : null;
   return (
     <button
       type='button'
-      className={`image-container ${props.selected ? "is-selected" : "is-not-selected"}`}
+      className='frame'
+      data-label={props.label}
+      data-slot={props.slot ?? undefined}
       onClick={props.onClick}
-      aria-pressed={props.selected}
-      title={props.imgDate ? `${label} · ${props.imgDate}` : label}
+      aria-pressed={props.slot !== null}
+      aria-label={`Photo ${props.label}${props.date ? `, ${props.date}` : ""}${
+        slotName ? `, shown as ${slotName}` : ""
+      }`}
     >
-      <span className='center-text'>
-        <span className='text-img-name'>{label}</span>
-        {props.imgDate ? <span className='text-img-date'>{props.imgDate}</span> : null}
+      <span className='frame-image'>
+        {thumbFailed ? null : (
+          <img
+            src={props.thumb}
+            alt=''
+            loading='lazy'
+            decoding='async'
+            draggable={false}
+            onError={() => setThumbFailed(true)}
+          />
+        )}
+        {slotName ? <span className='frame-tag'>{slotName}</span> : null}
       </span>
+      <span className='frame-num'>{props.label}</span>
+      <span className='frame-date'>{props.date || " "}</span>
     </button>
   );
 };

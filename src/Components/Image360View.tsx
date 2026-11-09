@@ -18,8 +18,13 @@ const viewerUrl = (image: Image) =>
 const Image360View: React.FC<Image360ViewProps> = ({ images, load, onRetry }) => {
   const isEmpty = images.length === 0;
   return (
-    <div>
-      <h1 className='center'>360 Image view</h1>
+    <section className='panoramas' aria-labelledby='panoramas-title'>
+      <div className='panoramas-head'>
+        <h2 id='panoramas-title' className='panoramas-title'>
+          360 panoramas
+        </h2>
+        <p className='panoramas-note'>From the ground. Each opens in a panorama viewer in a new tab.</p>
+      </div>
       {load.status === "error" ? (
         <LoadStatus message={`Couldn't load the 360 photos. ${load.message}`} onRetry={onRetry} />
       ) : null}
@@ -28,7 +33,7 @@ const Image360View: React.FC<Image360ViewProps> = ({ images, load, onRetry }) =>
       ) : null}
       {load.status === "loading" && isEmpty ? (
         <span className='sr-only' role='status'>
-          Loading 360 photosâ€¦
+          Loading 360 photos…
         </span>
       ) : null}
       <div className='image-gallery-360' aria-busy={load.status === "loading"}>
@@ -45,7 +50,7 @@ const Image360View: React.FC<Image360ViewProps> = ({ images, load, onRetry }) =>
               />
             ))}
       </div>
-    </div>
+    </section>
   );
 };
 
