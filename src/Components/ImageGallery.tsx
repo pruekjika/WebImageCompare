@@ -32,7 +32,25 @@ const readExifDateOrBlank = (url: string): Promise<string> =>
 const IMAGE_DB = "https://raw.githubusercontent.com/pruekjika/GardenImgDB/main/ImageDB/";
 const DEFAULT_A = "2";
 const DEFAULT_B = "71";
-const FRAME_MS = 650;
+// Timelapse speeds: how long each photo stays up. The choice is remembered per browser.
+const SPEEDS = [
+  { label: "0.5×", ms: 1200 },
+  { label: "1×", ms: 600 },
+  { label: "2×", ms: 300 },
+  { label: "4×", ms: 150 },
+] as const;
+const SPEED_KEY = "imagecompare.speed";
+const PRELOAD_AHEAD = 4;
+
+const readSpeed = (): number => {
+  try {
+    const raw = window.localStorage.getItem(SPEED_KEY);
+    const saved = raw === null ? NaN : Number(raw);
+    return Number.isInteger(saved) && saved >= 0 && saved < SPEEDS.length ? saved : 1;
+  } catch {
+    return 1;
+  }
+};
 const PLACEHOLDER_FRAMES = 14;
 
 const labelOf = (image: Image) => image.name.replace(/\.(webp|jpe?g|png|gif)$/i, "");
@@ -89,6 +107,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
   const [pair, setPair] = useState(readPairFromUrl);
   const [activeSlot, setActiveSlot] = useState<Slot>("a");
   const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(readSpeed);
+  const frameMs = SPEEDS[speed].ms;
   const lastMoved = useRef<Slot>("b");
 
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -243,9 +263,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     let cancelled = false;
     let timer = 0;
     const started = performance.now();
+    // Warm the browser cache a few photos ahead, so fast speeds aren't held up by the network.
+    for (const label of order.slice(at + 2, at + 1 + PRELOAD_AHEAD)) void preload(urlOf(label));
     void preload(urlOf(next)).then(() => {
       if (cancelled) return;
-      const wait = Math.max(0, FRAME_MS - (performance.now() - started));
+      const wait = Math.max(0, frameMs - (performance.now() - started));
       timer = window.setTimeout(() => {
         if (cancelled) return;
         lastMoved.current = "b";
@@ -256,7 +278,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [playing, pair.b, order, urlOf]);
+  }, [playing, pair.b, order, urlOf, frameMs]);
+
+  const cycleSpeed = () => {
+    setSpeed((s) => {
+      const next = (s + 1) % SPEEDS.length;
+      try {
+        window.localStorage.setItem(SPEED_KEY, String(next));
+      } catch {
+        // Private mode or blocked storage: the speed just isn't remembered.
+      }
+      return next;
+    });
+  };
 
   // Keep the photo that just moved in view on the timeline, without scrolling the page.
   useEffect(() => {
@@ -379,6 +413,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     </button>
   );
 
+  const speedButton = (extraClass = "") => (
+    <button
+      type='button'
+      className={`btn btn--speed ${extraClass}`}
+      onClick={cycleSpeed}
+      disabled={!canPlay}
+      aria-label={`Timelapse speed ${SPEEDS[speed].label}, change`}
+      title='Timelapse speed'
+    >
+      {SPEEDS[speed].label}
+    </button>
+  );
+
   let year = "";
   const frames = images.map((image) => {
     const label = labelOf(image);
@@ -427,7 +474,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
           {gap ? <span className='pair-gap'>{gap}</span> : null}
         </div>
         <div className='compare-actions'>
-          {playButton()}
+          <div className='play-group'>
+            {playButton()}
+            {speedButton()}
+          </div>
           <button
             ref={fullscreenBtnRef}
             type='button'
@@ -466,7 +516,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
           </span>
           {isFullscreen ? (
             <div className='stage-controls'>
-              {playButton("btn--on-photo")}
+              <div className='play-group'>
+                {playButton("btn--on-photo")}
+                {speedButton("btn--on-photo")}
+              </div>
               <button
                 ref={exitBtnRef}
                 type='button'

@@ -122,8 +122,10 @@ Flat and tonal: black page, darker stage, grey trays. Things on a photo sit on
 
 - The pair is kept in the URL (`?a=2&b=71`), so a comparison can be shared as a link. An unknown number falls back to 2 / 71.
 - ←/→ step B through the timeline, and with Shift they step A. They are ignored while the slider handle has focus.
-- **Play timelapse** walks B forward one photo at a time. It preloads each photo and shows it for at least 650ms,
-  and it restarts after A when B is at the end. Any manual choice pauses it.
+- **Play timelapse** walks B forward one photo at a time, loading the next 4 photos ahead.
+  It restarts after A when B is at the end, and any manual choice pauses it.
+- **Speed** is a button joined to Play (`.play-group`) that cycles 0.5× / 1× / 2× / 4×
+  (1200 / 600 / 300 / 150ms per photo). It defaults to 1×, and each browser remembers its choice in `localStorage`.
 
 ### Button (`.btn`)
 
