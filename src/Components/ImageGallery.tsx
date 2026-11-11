@@ -12,7 +12,7 @@ import {
   SwapIcon,
 } from "./Icons";
 import { Image } from "../Image";
-import { LoadState, thumbUrlOf } from "../api";
+import { LoadState, displayUrlOf, thumbUrlOf } from "../api";
 import "./ImageGallery.css";
 
 const EXIF_DATE = /^(\d{4}):(\d{1,2}):(\d{1,2})/;
@@ -48,7 +48,16 @@ const SPEEDS = [
   { label: "4×", ms: 150 },
 ] as const;
 const SPEED_KEY = "imagecompare.speed";
+const QUALITY_KEY = "imagecompare.hd";
 const PRELOAD_AHEAD = 4;
+
+const readHd = (): boolean => {
+  try {
+    return window.localStorage.getItem(QUALITY_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
 
 const readSpeed = (): number => {
   try {
@@ -121,6 +130,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
   const [activeSlot, setActiveSlot] = useState<Slot>("a");
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(readSpeed);
+  const [hd, setHd] = useState(readHd);
   const frameMs = SPEEDS[speed].ms;
   const lastMoved = useRef<Slot>("b");
 
@@ -292,8 +302,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     let timer = 0;
     const started = performance.now();
     // Warm the browser cache a few photos ahead, so fast speeds aren't held up by the network.
-    for (const label of order.slice(at + 2, at + 1 + PRELOAD_AHEAD)) void preload(urlOf(label));
-    void preload(urlOf(next)).then(() => {
+    for (const label of order.slice(at + 2, at + 1 + PRELOAD_AHEAD)) void preload(displayUrlOf(urlOf(label), hd));
+    void preload(displayUrlOf(urlOf(next), hd)).then(() => {
       if (cancelled) return;
       const wait = Math.max(0, frameMs - (performance.now() - started));
       timer = window.setTimeout(() => {
@@ -306,7 +316,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [playing, pair.b, order, urlOf, frameMs]);
+  }, [playing, pair.b, order, urlOf, frameMs, hd]);
+
+  const toggleHd = () => {
+    setHd((on) => {
+      try {
+        window.localStorage.setItem(QUALITY_KEY, on ? "0" : "1");
+      } catch {
+        // Blocked storage: the choice just isn't remembered.
+      }
+      return !on;
+    });
+  };
 
   const cycleSpeed = () => {
     setSpeed((s) => {
@@ -473,6 +494,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
     </button>
   );
 
+  const hdButton = (extraClass = "") => (
+    <button
+      type='button'
+      className={`btn btn--speed ${extraClass}`}
+      onClick={toggleHd}
+      aria-pressed={hd}
+      title={hd ? "Full size, about 1.3 MB a photo" : "Small size, about 0.45 MB a photo"}
+    >
+      {hd ? "HD" : "SD"}
+      <span className='btn-text speed-word'>{hd ? "full size" : "small"}</span>
+    </button>
+  );
+
   const speedButton = (extraClass = "") => (
     <button
       type='button'
@@ -539,6 +573,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
           <div className='play-group'>
             {playButton()}
             {speedButton()}
+            {hdButton()}
           </div>
           <button
             ref={fullscreenBtnRef}
@@ -565,14 +600,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, load, onRetry }) =>
           {/* Remount on a size change so the zoom layer re-centres in the new frame. */}
           <CompareZoomPanPinch
             key={isFullscreen ? "fullscreen" : "inline"}
-            a={{ url: urlA, label: pair.a, date: dateA }}
-            b={{ url: urlB, label: pair.b, date: dateB }}
+            a={{ url: displayUrlOf(urlA, hd), label: pair.a, date: dateA }}
+            b={{ url: displayUrlOf(urlB, hd), label: pair.b, date: dateB }}
           />
           {isFullscreen ? (
             <div className='stage-controls'>
               <div className='play-group'>
                 {playButton("btn--on-photo")}
                 {speedButton("btn--on-photo")}
+                {hdButton("btn--on-photo")}
               </div>
               <button
                 ref={exitBtnRef}

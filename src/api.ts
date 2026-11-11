@@ -29,6 +29,13 @@ export const thumbUrlOf = (image: Image): string =>
   image.thumb ??
   `https://wsrv.nl/?url=${encodeURIComponent(image.url)}&w=144&h=144&fit=cover&output=webp&q=60`;
 
+/**
+ * The photo sized for the screen (or the untouched original when `full`): 1920 px wide WebP through the same proxy. The originals are
+ * 4096x3072 and ~1.3 MB; this is ~0.45 MB and still holds enough detail for zoom.
+ */
+export const displayUrlOf = (url: string, full = false): string =>
+  full ? url : `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=1920&output=webp&q=75`;
+
 export type LoadState =
   | { status: "loading" }
   | { status: "ready" }
